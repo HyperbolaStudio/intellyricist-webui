@@ -18,6 +18,7 @@ import {
     NFormItem,
     NDynamicTags,
     NInput, 
+    NAlert,
     darkTheme,
     useOsTheme,
     zhCN,
@@ -97,15 +98,23 @@ function exportLyrics(){
 }
 const isGenerating = ref(false);
 const generatedResult = ref([] as string[]);
+const errorMessage = ref(null as string|null);
 async function generateAndShow(){
+    errorMessage.value = null;
     generatedResult.value = [];
     isGenerating.value = true;
-    generatedResult.value = generatedResult.value.concat(
-        (await generate(
-            {...generateArgs.value, enableKeywordsRestriction: enableKeywordsRestrictionArg.value, doPromptSelected: doPromptSelectedArg.value},
-            generateArgs.value.doPromptSelected ? generatedLyrics.value.filter(v=>v.isChecked).map(v=>v.text) : []
-        )));
-    isGenerating.value = false;
+    try{
+        generatedResult.value = generatedResult.value.concat(
+            (await generate(
+                {...generateArgs.value, enableKeywordsRestriction: enableKeywordsRestrictionArg.value, doPromptSelected: doPromptSelectedArg.value},
+                generateArgs.value.doPromptSelected ? generatedLyrics.value.filter(v=>v.isChecked).map(v=>v.text) : []
+            ))
+        );
+    }catch(e){
+        errorMessage.value = (e as Error).message;
+    }finally{
+        isGenerating.value = false;
+    }
 }
 function appendResult(){
     generatedLyrics.value = generatedLyrics.value.concat(generatedResult.value.map(text=>({isChecked: false, text})));
@@ -212,6 +221,7 @@ function appendResult(){
                             </NButton>
                         </NButtonGroup>
                         <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
+                        <NAlert type="error" title="生成时发生错误" :class="{hidden: !Boolean(errorMessage)}">{{ errorMessage }}</NAlert>
                         <template v-for="text in generatedResult">
                             <NInput readonly :value="text"/>
                         </template>

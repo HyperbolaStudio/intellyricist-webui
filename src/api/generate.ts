@@ -37,6 +37,6 @@ export async function generate(args: GenerateArgs, promptLines: string[]){
     if(args.linePrompt){
         lyricPrompt += args.linePrompt
     }
-    return responseHandle(await invokeApi([flag, keywordsText + lyricPrompt].join('\n')), prefixLength, args.enableKeywords);
+    return responseHandle(await invokeApi({flag, prompt: keywordsText + lyricPrompt}), prefixLength, args.enableKeywords);
     
 }
