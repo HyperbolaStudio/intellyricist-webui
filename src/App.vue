@@ -23,7 +23,7 @@ import {
     zhCN,
     NConfigProvider,
     NInputNumber} from 'naive-ui';
-import { DocumentExport, Delete, AiStatusComplete, CircleDash, CircleFilled, CircleSolid } from '@vicons/carbon';
+import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, CircleSolid } from '@vicons/carbon';
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import type { GenerateArgs } from './api/generate';
@@ -96,14 +96,20 @@ function exportLyrics(){
     isExportDialogShown.value = true;
 }
 const isGenerating = ref(false);
-async function generateAndAppend(){
+const generatedResult = ref([] as string[]);
+async function generateAndShow(){
+    generatedResult.value = [];
     isGenerating.value = true;
-    generatedLyrics.value = generatedLyrics.value.concat(
+    generatedResult.value = generatedResult.value.concat(
         (await generate(
             {...generateArgs.value, enableKeywordsRestriction: enableKeywordsRestrictionArg.value, doPromptSelected: doPromptSelectedArg.value},
             generateArgs.value.doPromptSelected ? generatedLyrics.value.filter(v=>v.isChecked).map(v=>v.text) : []
-        )).map(text=>({isChecked: false, text})));
+        )));
     isGenerating.value = false;
+}
+function appendResult(){
+    generatedLyrics.value = generatedLyrics.value.concat(generatedResult.value.map(text=>({isChecked: false, text})));
+    generatedResult.value = [];
 }
 </script>
 
@@ -190,12 +196,26 @@ async function generateAndAppend(){
                     </NFormItem>
                 </NForm>
                 <template #action>
-                    <NButton style="width: 100%" @click="generateAndAppend" :disabled="isGenerating">
-                        <template #icon>
-                            <NIcon><AiStatusComplete/></NIcon>
+                    <NSpace vertical>
+                        <NButtonGroup style="width: 100%">
+                            <NButton style="width: 50%" @click="generateAndShow" :disabled="isGenerating">
+                                <template #icon>
+                                    <NIcon><AiStatusComplete/></NIcon>
+                                </template>
+                                生成
+                            </NButton>
+                            <NButton style="width: 50%" @click="appendResult" :disabled="generatedResult.length == 0">
+                                <template #icon>
+                                    <NIcon><AddAlt/></NIcon>
+                                </template>
+                                添加
+                            </NButton>
+                        </NButtonGroup>
+                        <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
+                        <template v-for="text in generatedResult">
+                            <NInput readonly :value="text"/>
                         </template>
-                        生成
-                    </NButton>
+                    </NSpace>
                 </template>
             </NThing>
         </NLayoutSider>
@@ -218,7 +238,6 @@ async function generateAndAppend(){
                         </div>
                     </template>
                 </NDynamicInput>
-                <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
         </NLayoutContent>
     </NLayout>
 </NConfigProvider>
