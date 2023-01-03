@@ -57,7 +57,7 @@ const generateArgs = ref({
 
 const advancedArgs = ref({
     setManualSeed: null,
-    apiLocation: null,
+    apiLocation: '',
 } as AdvancedArgs);
 
 const enableKeywordsRestrictionArg = computed(()=>{

@@ -11,7 +11,7 @@ export interface GenerateArgs {
 
 export interface AdvancedArgs {
     setManualSeed: number|null,
-    apiLocation: string|null,
+    apiLocation: string,
 }
 
 export interface apiRequest {
@@ -50,6 +50,6 @@ export async function generate(args: GenerateArgs, promptLines: string[], advanc
     }
     let request:apiRequest = {flag, prompt: keywordsText + lyricPrompt};
     if(advancedArgs.setManualSeed !== null) request.seed = advancedArgs.setManualSeed;
-    return responseHandle(await invokeApi(request, advancedArgs.apiLocation??undefined), prefixLength, args.enableKeywords);
+    return responseHandle(await invokeApi(request, advancedArgs.apiLocation||undefined), prefixLength, args.enableKeywords);
     
 }
