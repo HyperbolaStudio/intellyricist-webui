@@ -13,6 +13,8 @@ import {
     NDynamicInput,
     NCheckbox,
     NPopconfirm,
+    NCollapse,
+    NCollapseItem,
     NForm,
     NSwitch,
     NFormItem,
@@ -27,7 +29,7 @@ import {
 import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, CircleSolid } from '@vicons/carbon';
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
-import type { GenerateArgs } from './api/generate';
+import type { AdvancedArgs, GenerateArgs } from './api/generate';
 import { generate } from './api/generate';
 const themePreference = computed(()=>{
     return useOsTheme().value == 'dark' ? darkTheme : null;
@@ -52,6 +54,11 @@ const generateArgs = ref({
     prefixBlanksNumber: null,
     linePrompt: null,
 } as GenerateArgs);
+
+const advancedArgs = ref({
+    setManualSeed: null,
+    apiLocation: null,
+} as AdvancedArgs);
 
 const enableKeywordsRestrictionArg = computed(()=>{
     if(mustEnableKeywordsRestriction.value) return true;
@@ -107,7 +114,8 @@ async function generateAndShow(){
         generatedResult.value = generatedResult.value.concat(
             (await generate(
                 {...generateArgs.value, enableKeywordsRestriction: enableKeywordsRestrictionArg.value, doPromptSelected: doPromptSelectedArg.value},
-                generateArgs.value.doPromptSelected ? generatedLyrics.value.filter(v=>v.isChecked).map(v=>v.text) : []
+                generateArgs.value.doPromptSelected ? generatedLyrics.value.filter(v=>v.isChecked).map(v=>v.text) : [],
+                advancedArgs.value,
             ))
         );
     }catch(e){
@@ -203,6 +211,19 @@ function appendResult(){
                     <NFormItem label="行Prompt">
                         <NInput v-model:value="generateArgs.linePrompt"/>
                     </NFormItem>
+                    <NCollapse>
+                        <NCollapseItem title="高级">
+                            <template #header-extra>
+                                留空以采用缺省设置
+                            </template>
+                            <NFormItem label="设置PyTorch随机数种子">
+                                <NInputNumber style="width: 100%" v-model:value="advancedArgs.setManualSeed"/>
+                            </NFormItem>
+                            <NFormItem label="API地址">
+                                <NInput v-model:value="advancedArgs.apiLocation"/>
+                            </NFormItem>
+                        </NCollapseItem>
+                    </NCollapse>
                 </NForm>
                 <template #action>
                     <NSpace vertical>

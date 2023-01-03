@@ -9,11 +9,22 @@ export interface GenerateArgs {
     linePrompt: string|null,
 }
 
+export interface AdvancedArgs {
+    setManualSeed: number|null,
+    apiLocation: string|null,
+}
+
+export interface apiRequest {
+    flag: string,
+    prompt: string,
+    seed?: number,
+}
+
 export function responseHandle(res: string, prefixLength: number, enableKeywords: boolean){
     return (enableKeywords? res.slice(res.indexOf('=')+1) : res).trim().split('；').slice(prefixLength);
 }
 
-export async function generate(args: GenerateArgs, promptLines: string[]){
+export async function generate(args: GenerateArgs, promptLines: string[], advancedArgs: AdvancedArgs){
     let flag = args.enableKeywords ? 'k' : 'p';
     let keywordsText = '';
     if(args.enableKeywords){
@@ -37,6 +48,8 @@ export async function generate(args: GenerateArgs, promptLines: string[]){
     if(args.linePrompt){
         lyricPrompt += args.linePrompt
     }
-    return responseHandle(await invokeApi({flag, prompt: keywordsText + lyricPrompt}), prefixLength, args.enableKeywords);
+    let request:apiRequest = {flag, prompt: keywordsText + lyricPrompt};
+    if(advancedArgs.setManualSeed !== null) request.seed = advancedArgs.setManualSeed;
+    return responseHandle(await invokeApi(request, advancedArgs.apiLocation??undefined), prefixLength, args.enableKeywords);
     
 }
