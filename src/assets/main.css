@@ -28,7 +28,8 @@ a,
   height: 100%;
 } */
 
-@media (max-width: 960px) {
+
+@media (max-width: 800px) {
   .n-layout-sider  {
     max-width: unset !important;
     width: unset !important;
@@ -36,9 +37,6 @@ a,
   .n-layout-sider-scroll-container {
     min-width: unset !important;
   }
-}
-
-@media (max-width: 800px) {
   .n-layout-scroll-container {
       display: block !important;
   }

@@ -6,7 +6,7 @@ export interface GenerateArgs {
     enableKeywordsRestriction: boolean,
     doPromptSelected: boolean,
     prefixBlanksNumber: number|null,
-    linePrompt: string|null,
+    linePrompt: string,
 }
 
 export interface AdvancedArgs {
@@ -45,9 +45,7 @@ export async function generate(args: GenerateArgs, promptLines: string[], advanc
         prefixLength += promptLines.length;
         lyricPrompt += promptLines.concat('').join('；');
     }
-    if(args.linePrompt){
-        lyricPrompt += args.linePrompt
-    }
+    lyricPrompt += args.linePrompt
     let request:apiRequest = {flag, prompt: keywordsText + lyricPrompt};
     if(advancedArgs.setManualSeed !== null) request.seed = advancedArgs.setManualSeed;
     return responseHandle(await invokeApi(request, advancedArgs.apiLocation||undefined), prefixLength, args.enableKeywords);

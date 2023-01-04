@@ -7,6 +7,7 @@ import {
     NLayout, 
     NSpace, 
     NLayoutContent, 
+    NLayoutHeader,
     NLayoutSider, 
     NModal,
     NThing,
@@ -26,11 +27,12 @@ import {
     zhCN,
     NConfigProvider,
     NInputNumber} from 'naive-ui';
-import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, CircleSolid } from '@vicons/carbon';
+import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, Incomplete } from '@vicons/carbon';
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import type { AdvancedArgs, GenerateArgs } from './api/generate';
 import { generate } from './api/generate';
+import { AppHeader } from './components';
 const themePreference = computed(()=>{
     return useOsTheme().value == 'dark' ? darkTheme : null;
 })
@@ -52,7 +54,7 @@ const generateArgs = ref({
     enableKeywordsRestriction: false,
     doPromptSelected: true,
     prefixBlanksNumber: null,
-    linePrompt: null,
+    linePrompt: '',
 } as GenerateArgs);
 
 const advancedArgs = ref({
@@ -132,146 +134,152 @@ function appendResult(){
 
 
 <template>
-<NConfigProvider :theme="themePreference" :locale="zhCN" style="height: 100%;">
-    <NLayout has-sider sider-placement="left" style="height: 100%">
-        <NLayoutSider
-            bordered
-            :width="480"
-        >
-            <NSpace class="button-row">
-                <NButtonGroup>
-                    <NButton @click="selectAll" :disabled="isEveryChecked">
-                        <template #icon>
-                            <NIcon><CircleSolid/></NIcon>
-                        </template>
-                        全选
-                    </NButton>
-                    <NButton @click="selectNone" :disabled="isEveryNotChecked">
-                        <template #icon>
-                            <NIcon><CircleDash/></NIcon>
-                        </template>
-                        全不选
-                    </NButton>
-                    <NButton @click="selectReverse" :disabled="isEveryChecked&&isEveryNotChecked">
-                        <template #icon>
-                            <NIcon><CircleFilled/></NIcon>
-                        </template>
-                        反选
-                    </NButton>
-                </NButtonGroup>
-                <NButton @click="exportLyrics" :disabled="isEveryChecked&&isEveryNotChecked">
-                    <template #icon>
-                        <NIcon><DocumentExport/></NIcon>
-                    </template>
-                    导出
-                </NButton>
-                <NPopconfirm @positive-click="deleteSelected">
-                    <template #trigger>
-                        <NButton :disabled="isEveryNotChecked">
-                            <template #icon>
-                                <NIcon><Delete/></NIcon>
-                            </template>
-                            删除
-                        </NButton>
-                        
-                    </template>
-                    确定要删除吗？
-                </NPopconfirm>
-                <NModal v-model:show="isExportDialogShown" preset="dialog">
-                    <template #header>导出</template>
-                    <NInput type="textarea" :value="fullLyrics" readonly></NInput>
-                </NModal>
-            </NSpace>
-            <NThing title="生成参数" class="button-row">
-                <NForm :model="generateArgs" label-placement="left">
-                    <NFormItem label="启用关键词">
-                        <NSwitch v-model:value="generateArgs.enableKeywords"/>
-                    </NFormItem>
-                    <div :class="{hidden: !generateArgs.enableKeywords}">
-                        <NFormItem label="关键词列表">
-                            <NDynamicTags v-model:value="generateArgs.keywords"/>
-                        </NFormItem>
-                        <NFormItem label="限定关键词">
-                            <NCheckbox 
-                                :checked="enableKeywordsRestrictionArg" 
-                                :on-update:checked="e=>generateArgs.enableKeywordsRestriction=e"
-                                :disabled="mustEnableKeywordsRestriction"
-                            />
-                        </NFormItem>
-                    </div>
-                    <NFormItem label="将选中行作为Prompt">
-                        <NCheckbox 
-                            :checked="doPromptSelectedArg" 
-                            :on-update:checked="e=>generateArgs.doPromptSelected=e"
-                            :disabled="isEveryNotChecked"/>
-                    </NFormItem>
-                    <NFormItem label="前缀空行">
-                        <NInputNumber style="width: 100%" v-model:value="generateArgs.prefixBlanksNumber"/>
-                    </NFormItem>
-                    <NFormItem label="行Prompt">
-                        <NInput v-model:value="generateArgs.linePrompt"/>
-                    </NFormItem>
-                    <NCollapse>
-                        <NCollapseItem title="高级">
-                            <template #header-extra>
-                                留空以采用缺省设置
-                            </template>
-                            <NFormItem label="设置PyTorch随机数种子">
-                                <NInputNumber style="width: 100%" v-model:value="advancedArgs.setManualSeed"/>
-                            </NFormItem>
-                            <NFormItem label="API地址">
-                                <NInput v-model:value="advancedArgs.apiLocation"/>
-                            </NFormItem>
-                        </NCollapseItem>
-                    </NCollapse>
-                </NForm>
-                <template #action>
-                    <NSpace vertical>
-                        <NButtonGroup style="width: 100%">
-                            <NButton style="width: 50%" @click="generateAndShow" :disabled="isGenerating">
+    <NConfigProvider :theme="themePreference" :locale="zhCN" style="height: 100%;">
+        <NLayout position="absolute">
+            <NLayoutHeader bordered style="height: 64px;">
+                <AppHeader/>
+            </NLayoutHeader>
+            <NLayoutContent position="absolute" style="top: 64px;">
+                <NLayout has-sider position="absolute">
+                    <NLayoutSider
+                        bordered
+                        :width="488"
+                    >
+                        <NSpace class="button-row">
+                            <NButtonGroup>
+                                <NButton @click="selectAll" :disabled="isEveryChecked">
+                                    <template #icon>
+                                        <NIcon :component="CircleFilled"/>
+                                    </template>
+                                    全选
+                                </NButton>
+                                <NButton @click="selectNone" :disabled="isEveryNotChecked">
+                                    <template #icon>
+                                        <NIcon :component="CircleDash"/>
+                                    </template>
+                                    全不选
+                                </NButton>
+                                <NButton @click="selectReverse" :disabled="isEveryChecked&&isEveryNotChecked">
+                                    <template #icon>
+                                        <NIcon :component="Incomplete"/>
+                                    </template>
+                                    反选
+                                </NButton>
+                            </NButtonGroup>
+                            <NButton @click="exportLyrics" :disabled="isEveryChecked&&isEveryNotChecked">
                                 <template #icon>
-                                    <NIcon><AiStatusComplete/></NIcon>
+                                    <NIcon :component="DocumentExport"/>
                                 </template>
-                                生成
+                                导出
                             </NButton>
-                            <NButton style="width: 50%" @click="appendResult" :disabled="generatedResult.length == 0">
-                                <template #icon>
-                                    <NIcon><AddAlt/></NIcon>
+                            <NPopconfirm @positive-click="deleteSelected">
+                                <template #trigger>
+                                    <NButton :disabled="isEveryNotChecked">
+                                        <template #icon>
+                                            <NIcon :component="Delete"/>
+                                        </template>
+                                        删除
+                                    </NButton>
                                 </template>
-                                添加
-                            </NButton>
-                        </NButtonGroup>
-                        <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
-                        <NAlert type="error" title="生成时发生错误" :class="{hidden: !Boolean(errorMessage)}">{{ errorMessage }}</NAlert>
-                        <template v-for="text in generatedResult">
-                            <NInput readonly :value="text"/>
-                        </template>
-                    </NSpace>
-                </template>
-            </NThing>
-        </NLayoutSider>
-        <NLayoutContent content-style="padding: 16px">
-                <NDynamicInput 
-                    v-model:value="generatedLyrics"
-                    :on-create="onLyricsCreate"
-                    show-sort-button
-                >
-                    <template #create-button-default>
-                        新建一行歌词
-                    </template>
-                    <template #default="{ value }">
-                        <div style="display: flex; align-items: center; width: 100%">
-                            <NCheckbox
-                            v-model:checked="value.isChecked"
-                            style="margin-right: 12px"
-                            />
-                            <NInput v-model:value="value.text" type="text" />
-                        </div>
-                    </template>
-                </NDynamicInput>
-        </NLayoutContent>
-    </NLayout>
-</NConfigProvider>
+                                确定要删除吗？
+                            </NPopconfirm>
+                            <NModal v-model:show="isExportDialogShown" preset="dialog">
+                                <template #header>导出</template>
+                                <NInput type="textarea" :value="fullLyrics" readonly></NInput>
+                            </NModal>
+                        </NSpace>
+                        <NThing title="生成参数" class="button-row">
+                            <NForm :model="generateArgs" label-placement="left">
+                                <NFormItem label="启用关键词">
+                                    <NSwitch v-model:value="generateArgs.enableKeywords"/>
+                                </NFormItem>
+                                <div :class="{hidden: !generateArgs.enableKeywords}">
+                                    <NFormItem label="关键词列表">
+                                        <NDynamicTags v-model:value="generateArgs.keywords"/>
+                                    </NFormItem>
+                                    <NFormItem label="限定关键词">
+                                        <NCheckbox 
+                                            :checked="enableKeywordsRestrictionArg" 
+                                            :on-update:checked="e=>generateArgs.enableKeywordsRestriction=e"
+                                            :disabled="mustEnableKeywordsRestriction"
+                                        />
+                                    </NFormItem>
+                                </div>
+                                <NFormItem label="将选中行作为Prompt">
+                                    <NCheckbox 
+                                        :checked="doPromptSelectedArg" 
+                                        :on-update:checked="e=>generateArgs.doPromptSelected=e"
+                                        :disabled="isEveryNotChecked"/>
+                                </NFormItem>
+                                <NFormItem label="前缀空行">
+                                    <NInputNumber style="width: 100%" v-model:value="generateArgs.prefixBlanksNumber"/>
+                                </NFormItem>
+                                <NFormItem label="行Prompt">
+                                    <NInput v-model:value="generateArgs.linePrompt"/>
+                                </NFormItem>
+                                <NCollapse>
+                                    <NCollapseItem title="高级">
+                                        <template #header-extra>
+                                            留空以采用缺省设置
+                                        </template>
+                                        <NFormItem label="设置PyTorch随机数种子">
+                                            <NInputNumber style="width: 100%" v-model:value="advancedArgs.setManualSeed"/>
+                                        </NFormItem>
+                                        <NFormItem label="API地址">
+                                            <NInput v-model:value="advancedArgs.apiLocation"/>
+                                        </NFormItem>
+                                    </NCollapseItem>
+                                </NCollapse>
+                            </NForm>
+                            <template #action>
+                                <NSpace vertical>
+                                    <NButtonGroup style="width: 100%">
+                                        <NButton style="width: 50%" @click="generateAndShow" :disabled="isGenerating">
+                                            <template #icon>
+                                                <NIcon :component="AiStatusComplete"/>
+                                            </template>
+                                            生成
+                                        </NButton>
+                                        <NButton style="width: 50%" @click="appendResult" :disabled="generatedResult.length == 0">
+                                            <template #icon>
+                                                <NIcon :component="AddAlt"/>
+                                            </template>
+                                            添加
+                                        </NButton>
+                                    </NButtonGroup>
+                                    <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
+                                    <NAlert type="error" title="生成时发生错误" :class="{hidden: !Boolean(errorMessage)}">{{ errorMessage }}</NAlert>
+                                    <template v-for="text in generatedResult">
+                                        <NInput readonly :value="text"/>
+                                    </template>
+                                </NSpace>
+                            </template>
+                        </NThing>
+                    </NLayoutSider>
+                    <NLayoutContent content-style="padding: 16px">
+                            <NDynamicInput 
+                                v-model:value="generatedLyrics"
+                                :on-create="onLyricsCreate"
+                                show-sort-button
+                            >
+                                <template #create-button-default>
+                                    新建一行歌词
+                                </template>
+                                <template #default="{ value }">
+                                    <div style="display: flex; align-items: center; width: 100%">
+                                        <NCheckbox
+                                        v-model:checked="value.isChecked"
+                                        style="margin-right: 12px"
+                                        />
+                                        <NInput v-model:value="value.text" type="text" />
+                                    </div>
+                                </template>
+                            </NDynamicInput>
+                    </NLayoutContent>
+                </NLayout>
+            </NLayoutContent>
+        </NLayout>
+    </NConfigProvider>
 </template>
 <style scoped>
 .button-row {
