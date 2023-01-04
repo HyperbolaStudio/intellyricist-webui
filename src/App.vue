@@ -252,7 +252,7 @@ function appendResult(){
                                     </NButtonGroup>
                                     <NAlert v-if="isGenerating" title="正在生成">
                                         <template #icon>
-                                            <NSpin size="small"/>
+                                            <NSpin :size="24"/>
                                         </template>
                                     </NAlert>
                                     <NAlert type="error" title="生成时发生错误" v-if="errorMessage">{{ errorMessage }}</NAlert>
