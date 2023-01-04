@@ -250,7 +250,11 @@ function appendResult(){
                                             添加
                                         </NButton>
                                     </NButtonGroup>
-                                    <NSpin v-if="isGenerating" style="margin-top: 16px"/>
+                                    <NAlert v-if="isGenerating" title="正在生成">
+                                        <template #icon>
+                                            <NSpin size="small"/>
+                                        </template>
+                                    </NAlert>
                                     <NAlert type="error" title="生成时发生错误" v-if="errorMessage">{{ errorMessage }}</NAlert>
                                     <template v-for="text in generatedResult">
                                         <NInput readonly :value="text"/>
