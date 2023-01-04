@@ -27,7 +27,7 @@ import {
     zhCN,
     NConfigProvider,
     NInputNumber} from 'naive-ui';
-import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, Incomplete } from '@vicons/carbon';
+import { DocumentExport, Delete, AddAlt, AiStatusComplete, CircleDash, CircleFilled, Incomplete, SettingsAdjust } from '@vicons/carbon';
 import { ref, computed } from 'vue';
 import { defineStore, storeToRefs } from 'pinia';
 import type { AdvancedArgs, GenerateArgs } from './api/generate';
@@ -145,7 +145,7 @@ function appendResult(){
                         bordered
                         :width="488"
                     >
-                        <NSpace class="button-row">
+                        <NSpace style="margin: 16px;">
                             <NButtonGroup>
                                 <NButton @click="selectAll" :disabled="isEveryChecked">
                                     <template #icon>
@@ -188,12 +188,15 @@ function appendResult(){
                                 <NInput type="textarea" :value="fullLyrics" readonly></NInput>
                             </NModal>
                         </NSpace>
-                        <NThing title="生成参数" class="button-row">
+                        <NThing title="生成参数" style="margin: 16px;">
+                            <template #avatar>
+                                <NIcon size="24" :component="SettingsAdjust"/>
+                            </template>
                             <NForm :model="generateArgs" label-placement="left">
                                 <NFormItem label="启用关键词">
                                     <NSwitch v-model:value="generateArgs.enableKeywords"/>
                                 </NFormItem>
-                                <div :class="{hidden: !generateArgs.enableKeywords}">
+                                <div v-if="generateArgs.enableKeywords">
                                     <NFormItem label="关键词列表">
                                         <NDynamicTags v-model:value="generateArgs.keywords"/>
                                     </NFormItem>
@@ -247,8 +250,8 @@ function appendResult(){
                                             添加
                                         </NButton>
                                     </NButtonGroup>
-                                    <NSpin :class="{hidden: !isGenerating}" style="margin-top: 16px"/>
-                                    <NAlert type="error" title="生成时发生错误" :class="{hidden: !Boolean(errorMessage)}">{{ errorMessage }}</NAlert>
+                                    <NSpin v-if="isGenerating" style="margin-top: 16px"/>
+                                    <NAlert type="error" title="生成时发生错误" v-if="errorMessage">{{ errorMessage }}</NAlert>
                                     <template v-for="text in generatedResult">
                                         <NInput readonly :value="text"/>
                                     </template>
@@ -282,10 +285,5 @@ function appendResult(){
     </NConfigProvider>
 </template>
 <style scoped>
-.button-row {
-    margin: 16px;
-}
-.hidden {
-    display: none;
-}
+
 </style>
