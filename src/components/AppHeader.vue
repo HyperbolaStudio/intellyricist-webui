@@ -70,7 +70,7 @@ function handleSelect(key: string){
     </NPageHeader>
 </template>
 
-<style>
+<style scoped>
 .nav-dropdown{
     display: none;
 }
