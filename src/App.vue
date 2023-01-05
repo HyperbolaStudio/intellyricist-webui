@@ -208,7 +208,7 @@ function appendResult(){
                                         />
                                     </NFormItem>
                                 </div>
-                                <NFormItem label="将选中行作为Prompt">
+                                <NFormItem label="将选中行作为 Prompt">
                                     <NCheckbox 
                                         :checked="doPromptSelectedArg" 
                                         :on-update:checked="e=>generateArgs.doPromptSelected=e"
@@ -217,7 +217,7 @@ function appendResult(){
                                 <NFormItem label="前缀空行">
                                     <NInputNumber style="width: 100%" v-model:value="generateArgs.prefixBlanksNumber"/>
                                 </NFormItem>
-                                <NFormItem label="行Prompt">
+                                <NFormItem label="行 Prompt">
                                     <NInput v-model:value="generateArgs.linePrompt"/>
                                 </NFormItem>
                                 <NCollapse>
@@ -225,10 +225,10 @@ function appendResult(){
                                         <template #header-extra>
                                             留空以采用缺省设置
                                         </template>
-                                        <NFormItem label="设置PyTorch随机数种子">
+                                        <NFormItem label="设置 PyTorch 随机数种子">
                                             <NInputNumber style="width: 100%" v-model:value="advancedArgs.setManualSeed"/>
                                         </NFormItem>
-                                        <NFormItem label="API地址">
+                                        <NFormItem label="API 地址">
                                             <NInput v-model:value="advancedArgs.apiLocation"/>
                                         </NFormItem>
                                     </NCollapseItem>

@@ -55,7 +55,7 @@ function handleSelect(key: string){
                 </NDropdown>
             </NSpace>
             <NDrawer :width="500" v-model:show="doShowHelp" placement="right">
-                <NDrawerContent title="帮助">这是帮助。</NDrawerContent>
+                <NDrawerContent title="帮助"><HelpSection/></NDrawerContent>
             </NDrawer>
             <NDrawer :width="500" v-model:show="doShowAbout" placement="right">
                 <NDrawerContent title="关于"><AboutSection/></NDrawerContent>
